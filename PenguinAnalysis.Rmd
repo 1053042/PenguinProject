@@ -1,0 +1,161 @@
+---
+title: "Penguin Analysis"
+output:
+  html_document: default
+  pdf_document: default
+date: "2022-12-06"
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+Purpose of this script: to load penguins dataset, clean it, run a linear regression of body mass against culmen length, create a figure for this test and save it as a series of files for different outputs.
+
+
+
+This code does not use a hard file path as its working directory. Instead it will refer to other files within the PenguinProject repository which can be used locally when downloaded together.
+
+#### Define functions used in this code
+
+The following functions are used in the data analysis and visualisation of the dataset. The functions can be found in the 'Functions' folder of the 'PenguinProject' repository.
+
+##### Cleaning
+
+'cleaning' function fixes the column names, removes any empty rows and removes the columns that start with 'delta' and the column called 'comments'.
+
+'remove_NA' function subsets the data to only include penguins that are not NA for both body mass and culmen length.
+
+```{r}
+source("functions/cleaning.r")
+#includes 'cleaning' and 'remove_NA' functions
+```
+
+
+##### Plotting
+
+'plot_regression' function plots a scatterplot of body mass against culmen length and overlays a linear model.
+
+```{r}
+source("functions/plotting.r")
+#includes 'plot_regression' function
+```
+
+
+##### Saving
+
+'save_reg_png' function saves the plot as a png when defining the size, resolution, and scaling.
+
+'save_reg_svg' function saves the plot as a svg when defining the size and scaling.
+
+Note that these functions have the 'plot_regression' function embedded into them.
+
+```{r}
+source("functions/saving.r")
+#includes 'save_reg_png' and 'save_reg_svg' functions
+```
+
+
+#### Load required packages
+
+```{r}
+library(palmerpenguins)
+library(ggplot2)
+suppressPackageStartupMessages(library(janitor))
+suppressPackageStartupMessages(library(dplyr))
+library(tidyr)
+library(ragg)
+library(svglite)
+```
+
+
+#### Load the Penguin dataset
+
+```{r}
+penguins_raw <- read.csv('data_raw/penguins_raw.csv')
+```
+
+
+#### Clean the data
+
+Use the 'cleaning' function to fix column names, remove empty rows and remove columns that start with 'delta' and 'comments' as we cannot analyse these.
+
+```{r}
+penguins_clean <- cleaning(penguins_raw)
+```
+
+
+Save the cleaned data.
+
+```{r}
+write.csv(penguins_clean, "data_clean/penguins_clean.csv")
+```
+
+
+#### Linear Regression
+
+We are testing whether body mass is a significant predictor of culmen length in penguins.
+
+Subset the data to include just culmen length and mass without any N/A values using the 'remove_NA' function.
+
+```{r}
+penguins_culmen_and_mass <- remove_NA(penguins_clean)
+```
+
+Create a linear model with body mass as the explanatory variable and culmen length as the response variable.
+
+```{r}
+penguinmod1 <- lm(culmen_length_mm ~ body_mass_g, penguins_culmen_and_mass )
+```
+
+Run ANOVA analysis on our linear regression to find if body mass significantly explains culmen length.
+
+```{r}
+anova(penguinmod1)
+```
+As p > 0.05 in this linear model, we can support the hypothesis that body mass significantly explains culmen length in these penguin species.
+
+##### Plot the linear regression with 95% confidence interval.
+```{r, message=FALSE}
+culmen_mass_plot <- plot_regression(penguins_culmen_and_mass)
+culmen_mass_plot
+```
+
+Figure 1: A scattergraph of body mass against culmen length. A fitted regression is overlayed on the graph. The grey shaded area is the 95% confidence interval.
+
+#### Save Figure
+
+Save the plot for a report using our 'save_reg_png' function, we specify an appropriate size, resolution and scale for use in a report.
+```{r, results='hide', message=FALSE}
+
+save_reg_png(penguins_culmen_and_mass, "figures/fig01_report.png", 
+                      size = 15, res = 600, scaling = 1)
+
+```
+
+The same function with new parameters is used for use in a presentation.
+```{r, results='hide', message=FALSE}
+save_reg_png(penguins_culmen_and_mass, "figures/fig01_presentation.png", 
+                      size = 15, res = 600, scaling = 1.4)
+```
+
+The same function with new parameters is used for use in a poster.
+```{r, results='hide', message=FALSE}
+save_reg_png(penguins_culmen_and_mass, "figures/fig01_poster.png", 
+                      size = 30, res = 600, scaling = 2.8)
+```
+
+Save the plot as a vector using the 'save_reg_svg' function, resolution need not be specified using this function.
+```{r, results='hide', message=FALSE}
+save_reg_svg(penguins_culmen_and_mass, "figures/fig01_vector.svg", 
+                      size = 15, scaling = 1)
+```
+
+
+
+
+
+
+
