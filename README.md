@@ -8,4 +8,4 @@ The raw data for analysis is required and can be found in the 'data_raw' file. T
 
 The analysis tests a linear regression of body mass against culmen length but can be modified by changing the 'remove_NA' function in the ('cleaning' file) to the desired factors  and changing the linear model.
 
-Make sure to download the entire repository to run the code locally.
+Make sure to download the entire repository and keep all files iwthin the same working directory to run the code locally.
